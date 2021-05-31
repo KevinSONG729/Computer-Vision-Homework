@@ -5,32 +5,54 @@ from scipy import linalg
 import numpy as np
 from matplotlib import pyplot as plt
 
-def MouseCallBack(imgHSV):
-    x, y = cv.setMouseCallback("imgHSV", getposHsv)
-    return imgHSV[y, x]
-
-
 def getposHsv(event, x, y, flags, param):
     if event == cv.EVENT_LBUTTONDOWN:
-        return x, y
+        param[1].append(param[0][y, x])
+
+def MouseCallBack(imgHSV):
+    cv.imshow("imgHSV", imgHSV)
+    hsv_value_list = []
+    cv.setMouseCallback("imgHSV", getposHsv, [imgHSV, hsv_value_list])
+    cv.waitKey(10000)
+    h_list = []
+    s_list = []
+    v_list = []
+    for i in hsv_value_list:
+        h_list.append(int(i[0]))
+        s_list.append(int(i[1]))
+        v_list.append(int(i[2]))
+    H_l, H_h, S_l, S_h, V_L, V_h = min(h_list), max(h_list), min(s_list), max(s_list), min(v_list), max(v_list)
+    colorL = (H_l, S_l, V_L)
+    colorH = (H_h, S_h, V_h)
+    print(colorL, colorH)
+    return colorL, colorH
 
 def genzong(path, Outpath):
-    mybuffer = 64
+    mybuffer = 16
     pts = deque(maxlen=mybuffer)
     cap = cv.VideoCapture(path)
     frame_fps = cap.get(cv.CAP_PROP_FPS)
+    frame_count = cap.get(cv.CAP_PROP_FRAME_COUNT)
     frame_height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
     frame_width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
     fourcc = cv.VideoWriter_fourcc(*'mp4v')
-    writer = cv.VideoWriter(Outpath, fourcc, frame_fps, (frame_width, frame_height), False)
-    (res, frame) = cap.read()
+    writer = cv.VideoWriter(Outpath, fourcc, frame_fps, (frame_width, frame_height), True)
+    detect = cv.createBackgroundSubtractorKNN(history=20, detectShadows=True)
+    i = 0
+    while(i<100):
+        (res, frame) = cap.read()
+        i = i + 1
     hsv_image = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-    hsv_value = MouseCallBack(hsv_image)
+    colorL, colorH = MouseCallBack(hsv_image)
     while res:
         (res, frame) = cap.read()
         if not res: break
+        #
+        # frame_knn = detect.apply(frame)
+        # frame_knn = cv.cvtColor(frame_knn, cv.COLOR_GRAY2BGR)
         hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-        mask = cv.inRange(hsv, hsv_value, hsv_value)
+        # mask = cv.inRange(hsv, colorL, colorH)
+        mask = cv.inRange(hsv, (0,20,5), (50,31,33))
         mask = cv.erode(mask, None, iterations=2)
         mask = cv.dilate(mask, None, iterations=2)
         cnts = cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
@@ -55,4 +77,4 @@ def genzong(path, Outpath):
 
 if __name__ == "__main__":
     print("dazuoye02_2")
-    genzong("目标跟踪/green_ball.mp4", "目标跟踪/green_ball_test.mp4")
+    genzong("目标跟踪/rat.mp4", "目标跟踪/rat_test.mp4")
