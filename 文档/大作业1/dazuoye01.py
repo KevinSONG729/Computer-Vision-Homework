@@ -70,9 +70,9 @@ def detect():
 def SIFT(img):
     sift = cv.SIFT_create()
     kp, des = sift.detectAndCompute(img, None)
-    # img_a = cv.drawKeypoints(img_a, kp, img_a, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    # plt.imshow(img_a)
-    # plt.show()
+    img_a = cv.drawKeypoints(img, kp, img, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    plt.imshow(img_a)
+    plt.show()
 
     # if(len(kp)!=0):
     #     des = des.reshape(-1,)
@@ -112,14 +112,14 @@ def SIFT_detect():
                                 img_list[i] = ((h+img_list[i][0])/2, (w+img_list[i][1])/2)
                                 break
                         if flag:
-                            # img_detect_final = cv.drawMatches(img_a, kp_a, img_detect, kp_b, goodMatch, None, flags=2)
-                            # plt.imshow(img_detect_final)
-                            # plt.show()
+                            img_detect_final = cv.drawMatches(img_a, kp_a, img_detect, kp_b, goodMatch, None, flags=2)
+                            plt.imshow(img_detect_final)
+                            plt.show()
                             img_list.append((h, w))
                     else:
-                        # img_detect_final = cv.drawMatches(img_a, kp_a, img_detect, kp_b, goodMatch, None, flags=2)
-                        # plt.imshow(img_detect_final)
-                        # plt.show()
+                        img_detect_final = cv.drawMatches(img_a, kp_a, img_detect, kp_b, goodMatch, None, flags=2)
+                        plt.imshow(img_detect_final)
+                        plt.show()
                         img_list.append((h, w))
     print(img_list)
     for i in img_list:
@@ -176,6 +176,8 @@ def myway():
 if __name__ == "__main__":
     print("dazuoye01")
     # dataEnhancement()
+    img = cv.imread("1-a.png")
+    SIFT(img)
     # detect()
     # SIFT_detect()
-    myway()
+    # myway()
